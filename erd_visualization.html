@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Olist DWH – ERD</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #0f1117;
+      color: #e2e8f0;
+      padding: 32px 24px;
+      min-height: 100vh;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    header h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #f8fafc;
+      letter-spacing: -0.5px;
+    }
+    header p {
+      margin-top: 8px;
+      font-size: 0.9rem;
+      color: #94a3b8;
+    }
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+      margin-bottom: 28px;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+    }
+    .badge-dim   { background: #1e3a5f; color: #60a5fa; border: 1px solid #2563eb; }
+    .badge-txn   { background: #14532d; color: #4ade80; border: 1px solid #16a34a; }
+    .badge-acc   { background: #431407; color: #fb923c; border: 1px solid #ea580c; }
+    .badge-per   { background: #3b0764; color: #c084fc; border: 1px solid #9333ea; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; }
+    .dot-dim { background: #60a5fa; }
+    .dot-txn { background: #4ade80; }
+    .dot-acc { background: #fb923c; }
+    .dot-per { background: #c084fc; }
+
+    .diagram-wrapper {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 32px;
+      overflow-x: auto;
+      box-shadow: 0 4px 32px rgba(0,0,0,0.4);
+    }
+    .mermaid {
+      display: flex;
+      justify-content: center;
+    }
+    .controls {
+      text-align: center;
+      margin-top: 20px;
+    }
+    .btn {
+      display: inline-block;
+      padding: 8px 20px;
+      background: #2563eb;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      margin: 0 6px;
+      text-decoration: none;
+    }
+    .btn:hover { background: #1d4ed8; }
+    .btn-outline {
+      background: transparent;
+      border: 1px solid #475569;
+      color: #94a3b8;
+    }
+    .btn-outline:hover { background: #1e293b; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Olist Data Warehouse – Entity Relationship Diagram</h1>
+  <p>Dimensional Model · Exercise 1 · Pacmann Data Storage</p>
+</header>
+
+<div class="legend">
+  <span class="badge badge-dim"><span class="dot dot-dim"></span>Dimension Table</span>
+  <span class="badge badge-txn"><span class="dot dot-txn"></span>Transaction Fact</span>
+  <span class="badge badge-acc"><span class="dot dot-acc"></span>Accumulating Snapshot Fact</span>
+  <span class="badge badge-per"><span class="dot dot-per"></span>Periodic Snapshot Fact</span>
+</div>
+
+<div class="diagram-wrapper">
+  <div class="mermaid">
+erDiagram
+
+    dim_date {
+        int date_key PK
+        date full_date
+        int day_of_week
+        string day_name
+        int day_of_month
+        int week_of_year
+        int month
+        string month_name
+        int quarter
+        int year
+        boolean is_weekend
+        boolean is_holiday
+    }
+
+    dim_customer {
+        int customer_key PK
+        string customer_id
+        string customer_unique_id
+        string customer_city
+        string customer_state
+        string customer_zip_code_prefix
+    }
+
+    dim_seller {
+        int seller_key PK
+        string seller_id
+        string seller_city
+        string seller_state
+        string seller_zip_code_prefix
+    }
+
+    dim_product {
+        int product_key PK
+        string product_id
+        string product_category_name
+        string product_category_name_english
+        float product_weight_g
+        float product_length_cm
+        float product_height_cm
+        float product_width_cm
+        int product_photos_qty
+    }
+
+    dim_payment_type {
+        int payment_type_key PK
+        string payment_type
+    }
+
+    dim_order_status {
+        int order_status_key PK
+        string order_status
+    }
+
+    fact_order_items {
+        int order_item_key PK
+        string order_id
+        int order_item_id
+        int customer_key FK
+        int seller_key FK
+        int product_key FK
+        int purchase_date_key FK
+        int order_status_key FK
+        decimal price
+        decimal freight_value
+        decimal total_value
+    }
+
+    fact_order_payments {
+        int payment_key PK
+        string order_id
+        int payment_sequential
+        int customer_key FK
+        int payment_type_key FK
+        int purchase_date_key FK
+        int payment_installments
+        decimal payment_value
+        boolean is_high_installment
+    }
+
+    fact_order_delivery {
+        int delivery_key PK
+        string order_id
+        int customer_key FK
+        int seller_key FK
+        int order_status_key FK
+        int purchase_date_key FK
+        int approval_date_key FK
+        int carrier_date_key FK
+        int delivered_date_key FK
+        int estimated_delivery_date_key FK
+        float days_to_approve
+        float days_to_ship
+        float days_to_deliver
+        float delivery_delay_days
+        boolean is_on_time
+    }
+
+    fact_monthly_sales {
+        int monthly_sales_key PK
+        int snapshot_month_key FK
+        int seller_key FK
+        string product_category
+        int total_orders
+        int total_items_sold
+        decimal total_revenue
+        decimal total_freight
+        float avg_review_score
+        float on_time_delivery_rate
+        int total_reviews
+    }
+
+    fact_order_reviews {
+        int review_key PK
+        string review_id
+        string order_id
+        int customer_key FK
+        int review_creation_date_key FK
+        int review_answer_date_key FK
+        int review_score
+        boolean has_comment_title
+        boolean has_comment_message
+        float days_to_review
+    }
+
+    fact_order_items }o--|| dim_customer : "customer_key"
+    fact_order_items }o--|| dim_seller : "seller_key"
+    fact_order_items }o--|| dim_product : "product_key"
+    fact_order_items }o--|| dim_date : "purchase_date_key"
+    fact_order_items }o--|| dim_order_status : "order_status_key"
+
+    fact_order_payments }o--|| dim_customer : "customer_key"
+    fact_order_payments }o--|| dim_payment_type : "payment_type_key"
+    fact_order_payments }o--|| dim_date : "purchase_date_key"
+
+    fact_order_delivery }o--|| dim_customer : "customer_key"
+    fact_order_delivery }o--|| dim_seller : "seller_key"
+    fact_order_delivery }o--|| dim_order_status : "order_status_key"
+    fact_order_delivery }o--|| dim_date : "purchase_date_key"
+    fact_order_delivery }o--|| dim_date : "approval_date_key"
+    fact_order_delivery }o--|| dim_date : "carrier_date_key"
+    fact_order_delivery }o--|| dim_date : "delivered_date_key"
+    fact_order_delivery }o--|| dim_date : "estimated_delivery_date_key"
+
+    fact_monthly_sales }o--|| dim_date : "snapshot_month_key"
+    fact_monthly_sales }o--|| dim_seller : "seller_key"
+
+    fact_order_reviews }o--|| dim_customer : "customer_key"
+    fact_order_reviews }o--|| dim_date : "review_creation_date_key"
+    fact_order_reviews }o--|| dim_date : "review_answer_date_key"
+  </div>
+</div>
+
+<div class="controls">
+  <button class="btn" onclick="window.print()">Print / Save as PDF</button>
+  <button class="btn btn-outline" onclick="document.querySelector('.diagram-wrapper').requestFullscreen()">Full Screen</button>
+</div>
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'default',
+    er: {
+      diagramPadding: 30,
+      layoutDirection: 'TB',
+      minEntityWidth: 100,
+      minEntityHeight: 75,
+      entityPadding: 15,
+      useMaxWidth: true
+    }
+  });
+</script>
+
+</body>
+</html>
